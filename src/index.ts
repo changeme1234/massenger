@@ -1,3 +1,4 @@
+require('dotenv').config()
 import express, { Request, Response, NextFunction } from 'express'
 import bodyParser from 'body-parser'
 import webhookController from './controllers/webhook.controller'

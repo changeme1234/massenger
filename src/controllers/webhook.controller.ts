@@ -1,5 +1,9 @@
-import express, { Request, Response, NextFunction } from 'express'
+import { Request, Response, NextFunction } from 'express'
+
+import Massenger from '../lib/'
 import { messengerEntryType } from '../lib/types'
+
+const massenger = new Massenger(process.env.PAGE_ACCESS_TOKEN)
 
 class WebhookController {
   post(req: Request, res: Response, next: NextFunction): void {
@@ -9,11 +13,16 @@ class WebhookController {
     if (body.object === 'page') {
       // Iterates over each entry - there may be multiple if batched
       body.entry.forEach((entry: messengerEntryType) => {
-        console.log(entry)
         // Gets the message. entry.messaging is an array, but
         // will only ever contain one message, so we get index 0
-        let webhook_event = entry.messaging[0]
-        console.log(webhook_event)
+        let webhookEvent = entry.messaging[0]
+        let senderPsid = webhookEvent.sender.id
+
+        if (webhookEvent.message) {
+          massenger.handleMessage(senderPsid, webhookEvent.message)
+        } else if (webhookEvent.postback) {
+          massenger.handlePostback(senderPsid, webhookEvent.postback)
+        }
       })
 
       // Returns a '200 OK' response to all requests

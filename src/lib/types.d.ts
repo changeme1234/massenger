@@ -1,6 +1,21 @@
-export interface messageType {
-  message: string
+interface sender {
+  id: string
 }
-export interface messagingType {
-  messaging: [messageType]
+
+interface messageType {
+  mid: string
+  text: string
+}
+
+interface postbackType {
+  title: String
+  payload: String
+}
+export interface eventType {
+  message?: messageType
+  postback?: any
+  sender: sender
+}
+export interface messengerEntryType {
+  messaging: [eventType]
 }
