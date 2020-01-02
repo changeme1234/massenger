@@ -1,4 +1,5 @@
 import Facebook from './Facebook'
+import Boat, { IBoat } from '../models/boat'
 
 export default class Massenger {
   facebook: Facebook
@@ -7,7 +8,7 @@ export default class Massenger {
     this.facebook = new Facebook(PAGE_ACCESS_TOKEN)
   }
 
-  handleMessage(senderPsid: string, receivedMessage: any) {
+  async handleMessage(senderPsid: string, receivedMessage: any) {
     let response
 
     // Check if the message contains text
@@ -56,35 +57,71 @@ export default class Massenger {
     this.facebook.callSendAPI(senderPsid, response)
   }
 
-  handlePostback(sender_psid: string, received_postback: any) {
+  async handlePostback(sender_psid: string, received_postback: any) {
     let response
 
     // Get the payload for the postback
-    let payload = received_postback.payload
-    switch (payload) {
-      case 'yes': {
-        response = { text: 'Thanks!' }
+    let payload = ''
+    try {
+      payload = JSON.parse(received_postback.payload)
+    } catch (_err) {
+      payload = received_postback.payload
+    }
+
+    if (payload === 'yes') {
+      response = { text: 'Thanks!' }
+    } else if (payload === 'no') {
+      response = { text: 'Oops, try sending another image.' }
+    } else if (payload === 'GET_STARTED') {
+      response = {
+        attachment: {
+          type: 'template',
+          payload: {
+            template_type: 'button',
+            text: 'You are not login yet, Login now!',
+            buttons: [
+              {
+                type: 'account_link',
+                url: `${process.env.ROOT_URL}/login`
+              }
+            ]
+          }
+        }
       }
-      case 'no':
-        response = { text: 'Oops, try sending another image.' }
-      case 'GET_STARTED': {
-        response = {
-          attachment: {
-            type: 'template',
-            payload: {
-              template_type: 'button',
-              text: 'You are not login yet, Login now!',
-              buttons: [
-                {
-                  type: 'account_link',
-                  url: 'https://e15ce95a.ngrok.io/login'
-                }
-              ]
-            }
+    } else if (payload === 'BOOK_BOAT') {
+      const boats: IBoat[] = await Boat.list()
+
+      response = {
+        attachment: {
+          type: 'template',
+          payload: {
+            template_type: 'generic',
+            elements: boats.map((boat: IBoat) => {
+              return {
+                title: boat.name,
+                image_url: boat.imageUrl,
+                subtitle: `₱ ${boat.price} \n ${boat.capacity} persons`,
+                buttons: [
+                  {
+                    type: 'web_url',
+                    url: `${process.env.ROOT_URL}/boats/${boat.id}`,
+                    webview_height_ratio: 'tall',
+                    title: 'View Detail'
+                  },
+                  {
+                    type: 'web_url',
+                    url: `${process.env.ROOT_URL}/bookings/${boat.id}`,
+                    webview_height_ratio: 'compact',
+                    title: 'Book Now'
+                  }
+                ]
+              }
+            })
           }
         }
       }
     }
+    console.log(received_postback)
     // Send the message to acknowledge the postback
     this.facebook.callSendAPI(sender_psid, response)
   }
