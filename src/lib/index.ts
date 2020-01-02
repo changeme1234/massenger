@@ -58,12 +58,29 @@ export default class Massenger {
 
     // Get the payload for the postback
     let payload = received_postback.payload
-
-    // Set the response based on the postback payload
-    if (payload === 'yes') {
-      response = { text: 'Thanks!' }
-    } else if (payload === 'no') {
-      response = { text: 'Oops, try sending another image.' }
+    switch (payload) {
+      case 'yes': {
+        response = { text: 'Thanks!' }
+      }
+      case 'no':
+        response = { text: 'Oops, try sending another image.' }
+      case 'GET_STARTED': {
+        response = {
+          attachment: {
+            type: 'template',
+            payload: {
+              template_type: 'button',
+              text: 'Try the log in button!',
+              buttons: [
+                {
+                  type: 'account_link',
+                  url: 'https://eb513246.ngrok.io/login'
+                }
+              ]
+            }
+          }
+        }
+      }
     }
     // Send the message to acknowledge the postback
     this.facebook.callSendAPI(sender_psid, response)
