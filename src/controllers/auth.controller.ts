@@ -7,9 +7,13 @@ class AuthController {
       <head></head>
       <body>
         <h1>Login</h1>
+        <span>Demo username is "user", password is "1234" </span>
+        <input type="text" name="username" value="user" />
+        <input type="password" name="password" value="1234" />
         <script></script>
       </body>
-    </html>  
+    </html>
+
     `)
   }
 

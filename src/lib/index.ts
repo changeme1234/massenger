@@ -13,8 +13,11 @@ export default class Massenger {
     // Check if the message contains text
     if (receivedMessage.text) {
       // Create the payload for a basic text message
-      response = {
-        text: `You sent the message: "${receivedMessage.text}". Now send me an image!`
+      switch (receivedMessage.text) {
+        default:
+          response = {
+            text: `You sent the message: "${receivedMessage.text}"!`
+          }
       }
     } else if (receivedMessage.attachments) {
       // Gets the URL of the message attachment
@@ -70,11 +73,11 @@ export default class Massenger {
             type: 'template',
             payload: {
               template_type: 'button',
-              text: 'Try the log in button!',
+              text: 'You are not login yet, Login now!',
               buttons: [
                 {
                   type: 'account_link',
-                  url: 'https://eb513246.ngrok.io/login'
+                  url: 'https://e15ce95a.ngrok.io/login'
                 }
               ]
             }
